@@ -1,157 +1,203 @@
-# snowbib
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/snowbib-logo-dark.png">
+    <img src="assets/snowbib-logo.png" alt="snowbib" width="420">
+  </picture>
+</p>
 
-Turn a research topic into an Obsidian vault — plain markdown, one note per paper,
-citations as wikilinks — and give your AI assistant a deterministic filter for the
-papers you have already seen.
+<p align="center">
+  <strong>Turn a research field into a map you can actually read.</strong><br>
+  One note per paper, the citation graph drawn for you, and an assistant that stops
+  suggesting papers you already have.
+</p>
 
-**Not a programmer?** Read [GETTING-STARTED.md](GETTING-STARTED.md) instead: it walks
-you through having Claude Desktop do all of this for you, without typing a command.
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-0a2540" alt="MIT">
+  <img src="https://img.shields.io/badge/python-3.9%2B-0a2540" alt="Python 3.9+">
+  <img src="https://img.shields.io/badge/dependencies-none-4a90d9" alt="No dependencies">
+  <img src="https://img.shields.io/badge/tests-23%20passing-4a90d9" alt="23 tests">
+  <img src="https://img.shields.io/badge/status-alpha-8bb8e8" alt="Alpha">
+</p>
 
-## Why
+---
 
-Literature tools already exist: Zotero, ResearchRabbit, Connected Papers, Litmaps.
-snowbib is for a narrower situation — you read with an LLM agent, and the agent keeps
-re-proposing papers you filed weeks ago. Asking a model to remember a 1,000-paper corpus
-does not work; it will confidently invent the answer. So don't ask it. Intersect DOIs.
+## What this is
 
-Two ideas shape the design:
+You pick a topic. snowbib asks [OpenAlex](https://openalex.org) — a free, open catalogue
+of 250 million scholarly works — which papers belong to it, and writes one small note per
+paper into a folder on your computer.
 
-- **The vault is the format.** Markdown you can grep, diff and version in git. The
-  citation graph lives *in the files*, not in an app's database. Papers you have not
-  filed yet are unresolved wikilinks: a record, not a debt.
-- **Four verdicts, no judgement calls.** `FILED`, `DROPPED`, `CITED xN`, `NEW`. The
-  third is the useful one: N notes in your vault cite it and it has no note of its own,
-  so your own corpus already voted for it.
+Then it does the part that matters: it looks up **which of those papers cite which**, and
+draws the links. You open the folder in [Obsidian](https://obsidian.md) and your field is
+a map.
 
-## Install
+<p align="center">
+  <em>It works out a field's canon by counting, not by asking anyone's opinion.</em>
+</p>
 
-```bash
-git clone https://github.com/carsanmilcar/snowbib && cd snowbib
-cp .env.example .env        # then put YOUR email in it
+On a test run over *topological data analysis* — 159 papers, no human input — the papers
+most cited by the collection turned out to be Edelsbrunner, Zomorodian & Carlsson and
+Ghrist. Which is exactly right, and nobody told it so.
+
+## Who it is for
+
+Researchers who read with an AI assistant and are tired of it suggesting the same paper
+for the third time. **You do not need to know how to program.** An AI assistant can
+install and run all of this for you — see [Quick start](#quick-start-no-programming).
+
+## What you get
+
+| | |
+|---|---|
+| 📄 **A note per paper** | Title, authors, year, DOI, citation count, open-access link |
+| 🔗 **The citation graph** | Who cites whom, as links you can click and see |
+| 🕳️ **Your blind spots** | Papers your collection cites constantly that you never filed |
+| 🚦 **A memory for your assistant** | Four answers to "do I already have this?" |
+| 📁 **Plain files** | Markdown on your disk. No account, no lock-in, no database |
+
+### The four answers
+
+Whenever a paper turns up — in a search, a recommendation, a reference list — you ask
+snowbib about it and get one of these:
+
+| Answer | Meaning |
+|---|---|
+| ✅ `FILED` | You already have it. Move on. |
+| 🗑️ `DROPPED` | You looked at it before and said no. |
+| ⭐ `CITED x53` | **53 of your papers cite it and you never filed it.** Read this one. |
+| 🆕 `NEW` | Genuinely unseen. Have a look. |
+
+The starred one is the reason to bother. It is not a recommendation engine guessing what
+you might like — it is a count of what the literature you already trust keeps leaning on.
+
+---
+
+## Quick start (no programming)
+
+Twenty minutes, most of it waiting. You will not type a single command: your AI
+assistant does that, you read what it says and answer.
+
+### 1. Install three free things
+
+| | What | Where |
+|---|---|---|
+| 🤖 | **Claude Desktop** — the app, not the website | [claude.ai/download](https://claude.ai/download) |
+| 🗂️ | **Obsidian** — to read your vault | [obsidian.md/download](https://obsidian.md/download) |
+| 🔧 | **Git** — only on Windows; macOS already has it | [git-scm.com/downloads/win](https://git-scm.com/downloads/win) |
+
+On Windows, install Git with all the default options, then **close and reopen Claude
+Desktop** so it notices. On macOS, skip it — if it turns out to be missing, Claude will
+tell you what to do.
+
+You also need **Python 3.9 or newer**. Do not go hunting for it: Claude checks and walks
+you through it if it is missing.
+
+### 2. Make an empty folder
+
+Anywhere you keep your work. Call it something like `my-field-vault`. Your notes will
+live there.
+
+### 3. Set up Claude Desktop
+
+Open it, go to the **Code** tab, and set four things before writing anything:
+
+| Setting | Choose |
+|---|---|
+| **Environment** | `Local` |
+| **Project folder** | the folder you just made |
+| **Model** | any current Claude model |
+| **Permission mode** | `Accept edits` |
+
+### 4. Send it this
+
+Copy the block below, **replace the two lines in capitals**, and send it.
+
+```text
+Please set up a snowbib vault in this folder by following the instructions at
+https://github.com/carsanmilcar/snowbib/blob/master/AGENT-INSTALL.md
+
+I don't program, so do everything yourself and explain each step in plain
+language. Stop and ask me before anything slow or irreversible.
+
+MY FIELD IS: persistent homology and topological data analysis
+MY EMAIL IS: me@university.edu
 ```
 
-No dependencies beyond the standard library. Python 3.9+. Run from the clone with
-`python -m snowbib.<command>`, or `pip install -e .` for the `snowbib-*` entry points.
+That address is not a sign-up. OpenAlex asks who is calling so it can give you the fast
+lane instead of the throttled one. It stays on your computer.
 
-`.env` holds `SNOWBIB_MAILTO`, the contact email OpenAlex asks for to grant polite-pool
-access — faster and far more reliable than the anonymous pool. Use your own address:
-requests identify whoever made them, so a shared one spends someone else's reputation.
-`.env` is gitignored. Real environment variables override it, so CI can export them.
+### 5. The one question that matters
 
-## Build a vault
+Claude will tell you how many papers matched **before downloading anything**:
 
-```bash
-python -m snowbib.init     --vault ~/tda --profile math
-python -m snowbib.discover --vault ~/tda --query "persistent homology" --min-citations 50 --dry-run
-python -m snowbib.discover --vault ~/tda --query "persistent homology" --min-citations 50
-python -m snowbib.cites    --vault ~/tda
-python -m snowbib.index    --vault ~/tda
-```
+- **Under ~2,000** — comfortable, go ahead.
+- **More than that** — your topic is too wide. Narrow it, or ask for only well-cited
+  papers. Notes are easy to add later and tedious to delete.
 
-Real output from that exact run:
+### 6. Open it in Obsidian
 
-```
-matches : 159
-written=159 skipped=0
+Obsidian → **Open folder as vault** → pick your folder. That is the whole setup; there
+is no import and no sync.
 
-fetching references for 159 notes ...
-OpenAlex returned references for 155 of 159
-resolving 8387 cited works that have no note ...
-notes updated      : 155
-edges inside vault : 317
-edges to no-note   : 10642 across 8387 papers
-most co-cited      : edelsbrunner2002topological x55, zomorodian2004computing x53,
-                     edelsbrunner2010computational x47, carlsson2009topology x44
-```
+Click the graph icon in the left sidebar. Solid dots are papers you have; hollow ones are
+papers yours cite that you have never filed. Those hollow dots are the point.
 
-That last line is the point: nobody told snowbib those are the foundational papers of
-computational topology. It counted what the field's own papers lean on.
+---
 
-**Always `--dry-run` first.** It reports how many works match and writes nothing.
-Above roughly 20,000 matches snowbib refuses outright and asks you to narrow the query.
+## Using it day to day
 
-## Filter candidates
+**"Do I already have this one?"**
 
-```bash
-python -m snowbib.check --vault ~/tda "10.1609/aaai.v35i2.16170" "Computing Persistent Homology"
-cat candidates.txt | python -m snowbib.check --vault ~/tda --new-only
-```
+> Ask your assistant: *Is this paper already in my vault? Check it with snowbib.*
 
-```
-FILED      abousamra2021localization     to_read  <- 10.1609/aaai.v35i2.16170
-CITED      zomorodian2004computing      x53      <- Computing Persistent Homology
-DROPPED    -                            previous round
-NEW        -  <- A totally unrelated paper about marmots
-```
+**"What am I missing?"**
 
-Candidates match by DOI, doi.org URL, OpenAlex id, citekey or title. A note needs only
-a `title` in its front matter; `doi`, `openalex_id` and `status` are used when present.
-Quoted, single-quoted, bare and folded YAML values all work.
+> *Show me the most co-cited papers that have no note, and add notes for the top 20.*
 
-`xN` counts **notes that cite it**, not how many times a note repeats the link.
+**"Read these properly for me."**
 
-## Screen what you collected
+> *Run snowbib screen and follow its instructions.*
 
-`python -m snowbib.screen` prints a work order — the profile's extraction prompt, the
-unscreened notes, and the rule that keeps it affordable: one agent per paper, so no
-paper body ever enters the orchestrating conversation. Paste it into your agent.
-snowbib itself never calls a language model.
+That last one prints a work order built to stay cheap: one assistant per paper, so no
+paper's full text ever piles up in your conversation. snowbib itself never calls an AI
+model — it only tells yours how to work.
 
-## Vault layout
-
-```
-your-vault/
-  papers/            one markdown note per paper, named <citekey>.md
-  .snowbib/          index, ledgers, profile and HTTP cache (generated)
-```
-
-Point snowbib at it with `--vault`, `SNOWBIB_VAULT`, or a `.env`; otherwise it uses the
-current directory. Notes live directly in `papers/`; pass `--recursive` if yours are in
-subfolders. Wikilinks starting with `MOC-` are Maps of Content rather than papers —
-change that with `--ignore-prefix`.
-
-## Ledgers
-
-Optional JSON files in `.snowbib/`, generated by `cites` or written by hand:
-
-- `excluded.json` — rounds you decided against: `{"ids": [...], "dois": [...]}` → `DROPPED`.
-- `ghost_meta.json` + `citekey_openalex_map.json` — metadata for papers known only as
-  citations, so `CITED` can be reached by DOI or title and not just by citekey.
-
-## Profiles
-
-What is worth extracting from a paper belongs to the field, not to the tool.
-`profiles/nwp.yaml` screens for reported metrics with their baseline and lead time;
-`profiles/math.yaml` for what is proved, under which hypotheses, with which technique.
-Write your own; `init --profile` copies it into the vault.
+---
 
 ## Honest limits
 
-- **Text search is blunt.** "persistent homology" also returns a molecular-biology paper
-  about the CDYL1 protein. Add `--min-citations`, a profile `field`, or delete the noise.
-- **Title matching is exact after normalising** (lowercase, accents and punctuation
-  stripped), not fuzzy. A candidate with no DOI and a slightly different title slips through.
-- **OpenAlex publishes references for roughly half of all works.** Measured against the
-  [OpenAlex API](https://docs.openalex.org/) for 2015 onwards: 850,355 of 1,564,988 works
-  in Mathematics (54%) and 890,248 of 2,085,158 in Earth and Planetary Sciences (43%).
-  In the run above, 155 of 159. A `NEW` verdict does not prove nothing cites it.
-- **Generated citekeys are guesses** (`lastname+year+word`), and duplicate records in
-  OpenAlex can produce near-twins like `zomorodian2004computing` and
-  `zomorodian2004computinga`. `citekey_openalex_map.json` keeps the id to reconcile with.
-- **Mathematics has MSC codes** (zbMATH, MathSciNet) that delimit a field far better than
-  OpenAlex topics. snowbib cannot see them; `profiles/math.yaml` leaves a field for them.
-- **snowbib does not download papers.** Metadata and the citation graph only.
+Read these before you trust it with something important.
 
-## Tests
+- **Searching by words is blunt.** Looking for *persistent homology* also drags in a
+  molecular-biology paper about a protein called CDYL1. Expect noise; deleting a note
+  costs nothing.
+- **OpenAlex knows the reference list of roughly half of all papers** — 54% in
+  mathematics, 43% in earth sciences, and worse in some journals. Some of your notes will
+  show no citations. That is the catalogue's limit, not a bug.
+- **Matching titles is exact, not fuzzy.** A paper with no DOI whose title differs by a
+  word can slip through as `NEW`.
+- **Mathematicians:** OpenAlex has no MSC codes, so its idea of your subfield is coarser
+  than zbMATH's. The `math` profile leaves an `msc` field for you to fill.
+- **snowbib does not download papers.** Metadata and the citation graph only. PDFs are
+  your business, through your library or the open-access links already in each note.
 
-```bash
-python -m unittest discover -s tests
-```
+---
 
-23 tests, no network. Every case in them is a bug that shipped once: front matter that
-is not double quoted, CRLF line endings, counting link occurrences instead of citing
-notes, a vault path with brackets.
+## Documentation
+
+| Document | For |
+|---|---|
+| [AGENT-INSTALL.md](AGENT-INSTALL.md) | The AI assistant doing the installation |
+| [REFERENCE.md](REFERENCE.md) | Commands, options, file formats, profiles |
+
+## How it compares
+
+Zotero, ResearchRabbit, Connected Papers and Litmaps all do parts of this, most of them
+better. snowbib exists for one thing they do not do: your files stay plain markdown on
+your disk, and your AI assistant gets a **mechanical** answer to "have I seen this
+before" — an intersection of identifiers, not a model trying to remember your library and
+inventing an answer when it cannot.
 
 ## License
 
-MIT.
+MIT. See [LICENSE](LICENSE).
