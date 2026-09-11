@@ -23,8 +23,33 @@ Two things you need from them. Ask now if you do not have both:
 3. **Never read a paper's full text into this conversation.** See [Screening](#screening).
 4. **Report what actually happened**, including the counts snowbib prints. If something
    fails, say so and show the error; do not paper over it.
+5. **The vault goes on their disk, not in yours.** If you run in a container, a sandbox or
+   a per-session working directory, anything you create there is gone when the session
+   ends. See step 0 before you create anything.
+6. **You cannot use Obsidian for them.** It is a desktop app with no command line. Your
+   job at the end is to walk them through it, one instruction at a time, and wait.
 
 ---
+
+## Step 0 — Decide where the vault lives. Ask, do not assume.
+
+This is the step that goes silently wrong. The vault is **theirs**: it has to sit on their
+own disk, in a folder they can still find months from now and open in Obsidian.
+
+Ask them where to put it, and offer a sensible default — `Documents/my-field-vault` on
+either platform. It must **not** be:
+
+- a temporary or per-session directory: anything under `/tmp`, `%TEMP%`, `/var/folders`,
+  or a working folder you created for this conversation
+- inside a container or sandbox that does not map to their real filesystem
+- inside the `snowbib-tool` clone
+
+**If you are running in a sandbox with no access to their real disk, stop and say so
+now.** Do not build a vault that will evaporate. Telling them the setup needs an assistant
+with access to their filesystem is a useful answer; a vanished vault is not.
+
+`init` prints a warning when the path looks temporary. Do not ignore it — confirm the
+location with the user and start again in the right place.
 
 ## Step 1 — Check Python
 
@@ -70,7 +95,7 @@ it is git-ignored so it can never be committed.
 ## Step 4 — Create the vault
 
 ```bash
-python -m snowbib.init --vault <THE FOLDER THEY CHOSE>
+python -m snowbib.init --vault <THE FOLDER FROM STEP 0>
 ```
 
 Add `--profile math` if their field is mathematical, or `--profile nwp` for weather and
@@ -140,9 +165,33 @@ python -m snowbib.discover --vault <VAULT> --query "<exact title>" --limit 1
 python -m snowbib.cites --vault <VAULT> && python -m snowbib.index --vault <VAULT>
 ```
 
-Then tell them how to open the folder in Obsidian: **Open folder as vault**, pick the
-folder, click the graph icon. Solid dots are filed papers, hollow ones are cited but
-unfiled.
+## Step 8 — Walk them through Obsidian. You cannot do this part for them.
+
+Obsidian is a desktop app: there is no command you can run, no file you can edit to do it
+for them. Give these instructions one at a time, in plain language, and wait for them to
+confirm each one. Assume they have never seen it.
+
+1. **Install it** from [obsidian.md/download](https://obsidian.md/download) if they have
+   not already. Free, no account, and it changes nothing — it just reads the folder you
+   built.
+2. **Open the vault.** On the welcome screen: *Open folder as vault* → choose **their
+   vault folder**, giving them the exact path you used → *Open*. If it asks about trusting
+   the folder, it is their own, so yes.
+3. **Look at one note.** The file list is on the left. Click any paper: the metadata is at
+   the top, then the summary, then its citations.
+4. **Open the graph** — the circular icon in the left sidebar, or Ctrl/Cmd+G. Explain what
+   they are looking at: each dot is a paper, each line a citation, **solid dots are papers
+   they have and hollow dots are papers cited by theirs that have no note**. The hollow
+   ones with many lines arriving are the reading list.
+5. **Show them how to find things.** Ctrl/Cmd+Shift+F searches the whole vault;
+   Ctrl/Cmd+O jumps to a note by name.
+
+Tell them the folder is theirs and stays readable without any of this: plain markdown
+files, no account, no sync, nothing that breaks if they stop using snowbib or Obsidian.
+Backing it up means copying the folder.
+
+Finish by telling them the three things they can ask you from now on: whether a paper is
+already in their vault, what the most co-cited unfiled papers are, and to screen a batch.
 
 ---
 
@@ -194,6 +243,7 @@ Re-run `discover` with the same query later and it skips everything already file
 |---|---|
 | `SNOWBIB_MAILTO is unset or malformed` | No `.env`, or it has no valid address. Step 3. |
 | `no papers directory at ...` | Wrong `--vault`, or `init` never ran. Step 4. |
+| `WARNING this vault is being created at ...` | You are building in a scratch, sandbox or session folder. Stop, agree a real location with the user, start again. Step 0. |
 | `WARNING the index has no notes` | Pointing at the wrong folder, or the vault is genuinely empty. Never report verdicts from an empty index. |
 | Everything comes back `NEW` | Same cause as above, nine times out of ten. |
 | `matches : 0` or a handful | The query is probably not in English. Translate it and re-run. Never conclude the field is empty from a non-English phrase. |

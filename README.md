@@ -117,10 +117,13 @@ Please set up a snowbib vault in this folder by following the instructions at
 https://github.com/carsanmilcar/snowbib/blob/master/AGENT-INSTALL.md
 
 I don't program, so do everything yourself and explain each step in plain
-language. Stop and ask me before downloading any papers.
+language. Stop and ask me before downloading any papers. Create the vault in
+the folder below, on my own computer, and when everything is ready walk me
+through opening it in Obsidian step by step.
 
 MY FIELD IS: supersymmetric quantum mechanics
 MY EMAIL IS: me@university.edu
+MY VAULT FOLDER IS: the folder this conversation is already working in
 ```
 
 > [!IMPORTANT]

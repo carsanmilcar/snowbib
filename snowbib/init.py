@@ -2,6 +2,8 @@
 import argparse
 import os
 import shutil
+import sys
+import tempfile
 
 from . import config, profile
 
@@ -18,8 +20,39 @@ rebuild. Open this folder as an Obsidian vault to read and link the notes.
 """
 
 
+# Path fragments that suggest a scratch directory, a sandbox, or an agent's own
+# working folder. A vault there is lost the moment the session ends, and the user
+# will never find it from Obsidian.
+EPHEMERAL = ("/tmp/", "\\temp\\", "/var/folders/", "/private/var/", "\\appdata\\local\\temp\\",
+             "/sandbox", "/workspace/", "/mnt/data", "/session", "/codex/", "/.cache/")
+
+
+def looks_ephemeral(path):
+    p = os.path.abspath(path).replace("\\", "/").lower() + "/"
+    tmp = tempfile.gettempdir().replace("\\", "/").lower()
+    if p.startswith(tmp.rstrip("/") + "/"):
+        return "it is inside the system temporary directory"
+    for frag in EPHEMERAL:
+        if frag.replace("\\", "/") in p:
+            return f"its path contains '{frag.strip('/').strip(chr(92))}'"
+    home = os.path.expanduser("~").replace("\\", "/").lower()
+    if home not in p:
+        return "it is outside the user's home directory"
+    return None
+
+
 def create(root=None, profile_name=None):
     root = config.vault_root(root)
+    reason = looks_ephemeral(root)
+    if reason:
+        print(f"snowbib: WARNING this vault is being created at\n  {root}\n"
+              f"and {reason}.\n"
+              f"  A vault must live on the user's own disk, somewhere they can find it "
+              f"again\n  and open in Obsidian — Documents/my-field-vault, for example. If "
+              f"this path is\n  a container, a sandbox or a per-session working folder, the "
+              f"notes disappear\n  when the session ends and nothing is kept.\n"
+              f"  Confirm the location with the user before going any further.",
+              file=sys.stderr)
     papers, tools = config.papers_dir(root), config.tools_dir(root)
     made = []
     for path in (root, papers, tools):

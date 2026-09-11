@@ -286,3 +286,29 @@ class TestLowMatchWarning(unittest.TestCase):
             self.assertIn("ENGLISH", err.getvalue())
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TestEphemeralVaultWarning(unittest.TestCase):
+    """A vault in a scratch or sandbox folder is lost when the session ends."""
+
+    def test_temp_directory_is_flagged(self):
+        from snowbib import init
+        tmp = tempfile.mkdtemp(prefix="snowbib-test-")
+        try:
+            self.assertIsNotNone(init.looks_ephemeral(os.path.join(tmp, "vault")))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_a_normal_home_folder_is_not_flagged(self):
+        from snowbib import init
+        self.assertIsNone(
+            init.looks_ephemeral(os.path.join(os.path.expanduser("~"),
+                                              "Documents", "my-field-vault")))
+
+    def test_agent_session_folders_are_flagged(self):
+        from snowbib import init
+        home = os.path.expanduser("~")
+        for bad in ("Documents/Codex/2026-09-11/some-session",
+                    "workspace/vault", "sandbox/vault"):
+            self.assertIsNotNone(init.looks_ephemeral(os.path.join(home, *bad.split("/"))),
+                                 f"{bad} should be flagged")
