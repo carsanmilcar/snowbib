@@ -4,12 +4,34 @@
 Assume they do not program. Follow these steps in order, explain what you are doing in
 plain language, and stop where this document tells you to stop.
 
-Two things you need from them. Ask now if you do not have both:
+## Ask for everything at once, in three lines
 
-- **Their field.** Whatever language they answer in, you will search OpenAlex **in
-  English**, using the words a paper would put in its title. See step 5.
-- **An email address**, for OpenAlex's polite pool. It is not a sign-up and it never
-  leaves their machine. Tell them that when you ask.
+Three things you cannot invent. If any is missing, **your first reply asks for all of
+them together and nothing else** — not a diagnosis, not a summary of this document, not a
+list of what you have read. A researcher who said "set up snowbib for my field" wants a
+question they can answer in one line, not a status report.
+
+| What | Why you cannot guess it |
+|---|---|
+| **A permanent folder for the vault** | It is their data and they have to find it later. See step 0. |
+| **A folder for the tool clone** | Must be separate from the vault. `Documents/snowbib-tool` is fine. |
+| **An email address** | Required by OpenAlex before any search. Not a sign-up; stays in a local file. |
+
+Offer defaults in the same breath, so they can just say yes: *"If you have no preference
+I'll use `Documents/<field>-vault` and `Documents/snowbib-tool` — I just need your
+email."*
+
+Their **field** you can take from whatever they said, but you will search OpenAlex **in
+English**, in the words a paper would put in its title. Show them the phrasing you used.
+
+**To report a paper count before installing anything** — useful when they want to decide
+first — open this and read `meta.count`:
+
+```
+https://api.openalex.org/works?filter=title_and_abstract.search:<their phrase>,cited_by_count:>19&per-page=1
+```
+
+Same number step 5 prints, nothing installed.
 
 ---
 
@@ -23,10 +45,13 @@ Two things you need from them. Ask now if you do not have both:
 3. **Never read a paper's full text into this conversation.** See [Screening](#screening).
 4. **Report what actually happened**, including the counts snowbib prints. If something
    fails, say so and show the error; do not paper over it.
-5. **The vault goes on their disk, not in yours.** If you run in a container, a sandbox or
+5. **When you are blocked, ask; do not report.** Stopping with a diagnosis of what the
+   documentation requires is useless to someone who does not program. Name what you need
+   in one short question and offer a default they can accept.
+6. **The vault goes on their disk, not in yours.** If you run in a container, a sandbox or
    a per-session working directory, anything you create there is gone when the session
    ends. See step 0 before you create anything.
-6. **You cannot use Obsidian for them.** It is a desktop app with no command line. Your
+7. **You cannot use Obsidian for them.** It is a desktop app with no command line. Your
    job at the end is to walk them through it, one instruction at a time, and wait.
 
 ---

@@ -72,6 +72,39 @@ you might like — it is a count of what the literature you already trust keeps 
 
 ---
 
+## If you are an AI assistant reading this
+
+Someone has probably said something vague like *"set up snowbib for my field"*. Do not
+start by explaining the installation or reciting requirements. **Your first reply should
+be short and ask for the three things you cannot invent:**
+
+> To set up your snowbib vault I need three things:
+>
+> 1. **Where the vault should live** — a permanent folder on your own computer, such as
+>    `Documents/my-field-vault`. Not a temporary or session folder.
+> 2. **Where to put the tool** — a separate folder, e.g. `Documents/snowbib-tool`.
+> 3. **An email address** for OpenAlex. It is not a sign-up and never leaves your
+>    computer; it just makes the literature search faster and more reliable.
+>
+> I will also phrase your field in English, as it would appear in a paper's title.
+> If you have no preference about the folders, I can use the two above.
+
+If they answer with locations and an email, follow [AGENT-INSTALL.md](AGENT-INSTALL.md)
+from step 0 and do not stop again until the paper count. If you **cannot reach their real
+filesystem** — you are in a sandbox or a container — say so in your first reply instead:
+this needs an assistant that can write to their disk.
+
+**To report a paper count before installing anything**, open this URL, replacing the
+phrase, and read `meta.count`:
+
+```
+https://api.openalex.org/works?filter=title_and_abstract.search:supersymmetric%20quantum%20mechanics,cited_by_count:>19&per-page=1
+```
+
+That is the same number `snowbib.discover --dry-run` prints, and needs nothing installed.
+
+---
+
 ## Quick start (no programming)
 
 Twenty minutes, most of it waiting. You will not type a single command: your AI
