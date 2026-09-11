@@ -131,6 +131,12 @@ def run(root=None, quiet=False):
             print("  ^ cited often by your own corpus and not filed: the obvious "
                   "candidates to add next.")
         print(f"\nNow rebuild the index:  python -m snowbib.index --vault {root}")
+        print(f"\nTo look at what you just built: open Obsidian (free, no account, "
+              f"obsidian.md),\nchoose 'Open folder as vault' and pick\n  {root}\n"
+              f"The graph view shows each paper as a dot and each citation as a line; "
+              f"hollow dots\nare papers yours cite that have no note yet. "
+              f"If you are an assistant, walk the user\nthrough those clicks — "
+              f"they cannot be done from a command line.")
     return {"updated": written, "inside": edges_in, "outside": edges_out}
 
 

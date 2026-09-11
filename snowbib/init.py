@@ -79,6 +79,8 @@ def create(root=None, profile_name=None):
         print(f"profile: {prof.get('name')}")
 
     print(f"vault ready at {root}")
+    print("  ^ this folder is the vault: open it in Obsidian (obsidian.md, free) with "
+          "'Open folder as vault' once it has notes in it.")
     for path in made:
         print(f"  created {os.path.relpath(path, root) if path != root else '.'}")
     if not made:

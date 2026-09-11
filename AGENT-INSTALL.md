@@ -52,7 +52,12 @@ Same number step 5 prints, nothing installed.
    a per-session working directory, anything you create there is gone when the session
    ends. See step 0 before you create anything.
 7. **You cannot use Obsidian for them.** It is a desktop app with no command line. Your
-   job at the end is to walk them through it, one instruction at a time, and wait.
+   job is to walk them through it, one instruction at a time, and wait.
+8. **Do not save Obsidian for the end.** The moment the vault has its first notes, tell
+   them how to open it, even if the conversation has gone somewhere else since. A vault
+   they cannot look at is not a result. If the session drifts — they ask about a
+   different paper, they tell you to stop running things — the Obsidian walkthrough is
+   the one thing you still owe them.
 
 ---
 
