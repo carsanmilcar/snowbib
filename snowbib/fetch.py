@@ -58,11 +58,18 @@ def download(url, dest, timeout=90):
     return len(data)
 
 
-def pending(root=None, only_unscreened=False):
-    """Notes with an open-access link and no PDF downloaded yet."""
+def pending(root=None, only_unscreened=False, keys=None):
+    """Notes with an open-access link and no PDF downloaded yet.
+
+    `keys` restricts to a chosen set of citekeys: the usual case is a person
+    picking which papers are worth reading, which is not the same as the first N
+    in alphabetical order.
+    """
     papers, out = config.papers_dir(root), []
     for path in sorted(glob.glob(os.path.join(glob.escape(papers), "*.md"))):
         key = os.path.splitext(os.path.basename(path))[0]
+        if keys and key not in keys:
+            continue
         fm = frontmatter.split(index.read_note(path))
         if only_unscreened and frontmatter.get(fm, "status") not in ("to_read", ""):
             continue
@@ -111,12 +118,19 @@ def run_resolver_cmd(template, doi, dest):
 
 
 def run(root=None, limit=None, only_unscreened=False, resolver=None, pause=1.0,
-        resolver_cmd=None, use_scihub=False):
+        resolver_cmd=None, use_scihub=False, keys=None):
     root = config.vault_root(root)
     if not os.path.isdir(config.papers_dir(root)):
         sys.exit(f"snowbib: no vault at {root}")
 
-    items = pending(root, only_unscreened)
+    items = pending(root, only_unscreened, keys)
+    if keys:
+        missing = sorted(set(keys) - {i["citekey"] for i in items})
+        if missing:
+            print(f"snowbib: no note for {', '.join(missing[:5])}"
+                  f"{' ...' if len(missing) > 5 else ''}", file=sys.stderr)
+        if not items:
+            sys.exit("snowbib: none of the citekeys you asked for exist in this vault.")
     todo = [i for i in items if not i["have"]]
     have = len(items) - len(todo)
     print(f"{len(items)} note(s), {have} already downloaded, {len(todo)} to try")
@@ -168,6 +182,11 @@ def main(argv=None):
         description="Download open-access PDFs for the notes in a vault.")
     p.add_argument("--vault", help="vault root (default: $SNOWBIB_VAULT or cwd)")
     p.add_argument("--limit", type=int, help="stop after N successful downloads")
+    p.add_argument("--citekey", action="append", default=[], metavar="KEY",
+                   help="only this note; repeat for several. Use it to download the "
+                        "papers someone actually chose, rather than the first N")
+    p.add_argument("--from-file", metavar="PATH",
+                   help="file with one citekey per line (blank lines and # ignored)")
     p.add_argument("--unscreened", action="store_true",
                    help="only notes still at status: to_read")
     p.add_argument("--resolver", metavar="URL",
@@ -188,8 +207,13 @@ def main(argv=None):
     p.add_argument("--pause", type=float, default=1.0,
                    help="seconds between downloads (default 1.0; be kind to servers)")
     a = p.parse_args(argv)
+    keys = set(a.citekey)
+    if a.from_file:
+        with open(a.from_file, encoding="utf-8") as fh:
+            keys |= {l.strip() for l in fh
+                     if l.strip() and not l.lstrip().startswith("#")}
     run(a.vault, a.limit, a.unscreened, a.resolver, a.pause, a.resolver_cmd,
-        a.scihub)
+        a.scihub, keys or None)
 
 
 if __name__ == "__main__":

@@ -245,9 +245,14 @@ class TestDiscoverFilter(unittest.TestCase):
         self.assertIn("publication_year:>2014", f)
         self.assertIn("cited_by_count:>49", f)
 
-    def test_several_queries_are_or_ed(self):
+    def test_several_queries_are_unioned_with_a_pipe_not_the_word_or(self):
+        """OpenAlex unions with "|". "a OR b" searches for the literal word and
+        returns fewer works than either phrase alone — measured: 3,046 for one
+        phrase, 715 for the two joined by OR, 7,691 joined by "|"."""
         from snowbib import discover
-        self.assertIn(" OR ", discover.build_filter(["a", "b"]))
+        f = discover.build_filter(["a", "b"])
+        self.assertIn("search:a|b", f)
+        self.assertNotIn(" OR ", f)
 
 
 class TestInit(unittest.TestCase):
@@ -462,6 +467,23 @@ class TestScihubAdapter(unittest.TestCase):
                 scihub.fetch("10.1000/x", os.path.join(tempfile.gettempdir(), "y.pdf"))
         finally:
             scihub._load = real
+
+
+class TestCuratedSelection(VaultCase):
+    """Downloading what someone chose, not the first N alphabetically."""
+
+    def test_citekeys_restrict_the_set(self):
+        from snowbib import fetch
+        for k in ("aaa2020first", "mmm2020middle", "zzz2020last"):
+            self.write(k + ".md", note(title=f'"{k}"', oa_pdf='"https://x/y.pdf"'))
+        keys = {i["citekey"] for i in fetch.pending(self.vault, keys={"zzz2020last"})}
+        self.assertEqual(keys, {"zzz2020last"})
+
+    def test_no_keys_means_everything(self):
+        from snowbib import fetch
+        self.write("a.md", note(title='"A"'))
+        self.write("b.md", note(title='"B"'))
+        self.assertEqual(len(fetch.pending(self.vault)), 2)
 
 if __name__ == "__main__":
     unittest.main()

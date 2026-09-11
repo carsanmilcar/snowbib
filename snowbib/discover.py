@@ -14,8 +14,9 @@ from . import config, index, notes, openalex, profile
 def build_filter(queries, field=None, min_year=None, min_citations=None):
     parts = []
     if queries:
-        parts.append("title_and_abstract.search:" + " OR ".join(queries)
-                     if len(queries) > 1 else f"title_and_abstract.search:{queries[0]}")
+        # OpenAlex unions with "|", not with the word OR: writing "a OR b" searches
+        # for the literal word and returns FEWER works than either phrase alone.
+        parts.append("title_and_abstract.search:" + "|".join(queries))
     if field:
         parts.append(f"primary_topic.field.id:{field}")
     if min_year:
@@ -43,7 +44,7 @@ def run(root=None, queries=None, prof=None, limit=None, min_year=None,
     filters = build_filter(queries, oa.get("field"),
                            min_year or oa.get("min_year"), min_citations)
     total = openalex.count(filters)
-    print(f"query   : {' OR '.join(queries)}")
+    print(f"query   : {chr(124).join(queries)}")
     print(f"filter  : {filters}")
     print(f"matches : {total:,}" + (f"  (fetching the first {limit:,})" if limit and limit < total else ""))
 
@@ -109,7 +110,7 @@ def main(argv=None):
         description="Populate a vault from OpenAlex (metadata only).")
     p.add_argument("--vault", help="vault root (default: $SNOWBIB_VAULT or cwd)")
     p.add_argument("--query", action="append", default=[],
-                   help="search phrase; repeat for several (they are OR-ed)")
+                   help="search phrase; repeat for several, unioned with OpenAlex's |")
     p.add_argument("--profile", help="field profile providing queries and extra fields")
     p.add_argument("--limit", type=int, help="stop after N works")
     p.add_argument("--min-year", type=int)

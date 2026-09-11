@@ -11,7 +11,9 @@ git clone https://github.com/carsanmilcar/snowbib && cd snowbib
 cp .env.example .env        # put your address in SNOWBIB_MAILTO
 ```
 
-Python 3.9+. One dependency, pymupdf4llm, needed only by `convert`. Run from the clone with `python -m snowbib.<command>`,
+Python 3.9+. One dependency, pymupdf4llm, needed only by `convert`. On macOS and Linux
+the system Python usually refuses `pip install` (PEP 668), so use a virtual environment:
+`python -m venv .venv && .venv/bin/python -m pip install -e .` Run from the clone with `python -m snowbib.<command>`,
 or `pip install -e .` for the `snowbib-*` entry points.
 
 ## Configuration
@@ -59,8 +61,8 @@ python -m snowbib.discover [--vault PATH] [--query PHRASE]... [--profile NAME]
                            [--min-year YEAR] [--min-citations N] [--limit N] [--dry-run]
 ```
 
-Metadata only: it never reads a paper and never calls a language model. Repeat `--query`
-to OR several phrasings. `--profile` supplies queries and the extra front matter fields
+Metadata only: it never reads a paper and never calls a language model. Repeat `--query` to
+search several phrasings at once; they are unioned with OpenAlex's `|`. `--profile` supplies queries and the extra front matter fields
 when you do not pass `--query`.
 
 `--dry-run` reports the match count and writes nothing — **always run it first**. Above
@@ -119,8 +121,13 @@ read the verdicts.
 ### `fetch` — download the open-access PDFs
 
 ```bash
-python -m snowbib.fetch [--vault PATH] [--limit N] [--unscreened] [--resolver URL] [--pause S]
+python -m snowbib.fetch [--vault PATH] [--citekey KEY]... [--from-file PATH]
+                        [--limit N] [--unscreened] [--resolver URL] [--resolver-cmd CMD]
+                        [--scihub] [--pause S]
 ```
+
+`--citekey` and `--from-file` download a chosen set rather than the first N in
+alphabetical order, which is what `--limit` gives you.
 
 Downloads the `oa_pdf` link OpenAlex publishes for each note into
 `.snowbib/pdf/<citekey>.pdf`. Verifies the bytes really are a PDF, so a landing page or
@@ -274,6 +281,6 @@ comments — not arbitrary YAML. Keep to the shape above.
 python -m unittest discover -s tests
 ```
 
-38 tests, no network. Every case is a bug that shipped once: front matter that is not
+40 tests, no network. Every case is a bug that shipped once: front matter that is not
 double quoted, CRLF line endings, counting link occurrences instead of citing notes, a
 vault path with brackets.

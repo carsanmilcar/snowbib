@@ -95,16 +95,6 @@ Needs 3.9 or newer. If it is missing:
 - **macOS** — `brew install python` if they have Homebrew; otherwise the python.org
   installer.
 
-## Step 1b — Install the one dependency
-
-```bash
-cd snowbib-tool && pip install -e .
-```
-
-That pulls in `pymupdf4llm`, needed only to turn downloaded PDFs into text. Everything
-else — building the vault, the citation graph, the filter — works without it, so if the
-install fails, say so and carry on rather than stopping the setup.
-
 ## Step 2 — Clone the tool
 
 Clone it into a **subfolder**, so the tool stays separate from their notes:
@@ -117,6 +107,24 @@ Run every later command from inside `snowbib-tool`, pointing at the vault with
 `--vault`. If `git` is missing on Windows, send them to
 [git-scm.com/downloads/win](https://git-scm.com/downloads/win) and have them restart the
 app afterwards.
+
+## Step 2b — Install, in a virtual environment
+
+```bash
+cd snowbib-tool
+python -m venv .venv
+.venv/bin/python -m pip install -e .        # Windows: .venv\Scripts\python -m pip install -e .
+```
+
+**Use the venv, do not skip it.** On macOS with Homebrew and on most Linux distributions a
+plain `pip install` fails with `externally-managed-environment` (PEP 668), because the
+system Python refuses to be written to. Do not reach for `--break-system-packages`: create
+the environment, and run every later snowbib command with `.venv/bin/python -m snowbib.…`
+rather than a bare `python`.
+
+This installs `pymupdf4llm`, needed only to turn downloaded PDFs into text. Everything
+else — the vault, the citation graph, the filter — works without it, so if this step
+fails, say so and carry on rather than stopping the setup.
 
 ## Step 3 — Configure the email
 
@@ -156,7 +164,7 @@ python -m snowbib.discover --vault <VAULT> --query "<their topic>" --min-citatio
 | Over 10,000 | Too wide to be readable. Propose a narrower phrase and re-run the dry run. |
 | Under 50 | **Check the language first.** See below. |
 
-Pass `--query` several times to widen with alternative phrasings; they are OR-ed.
+Pass `--query` several times to widen with alternative phrasings; they are unioned.
 `--min-year` cuts off old work. **Do not proceed until they answer.**
 
 **If the count is near zero, the query language is almost always the cause.** OpenAlex
@@ -258,7 +266,9 @@ python -m snowbib.convert --vault <VAULT>
 ```
 
 `fetch` downloads only the open-access versions OpenAlex knows about, into
-`.snowbib/pdf/`. It will report some papers as having no open version — that is expected,
+`.snowbib/pdf/`. When the user has chosen which papers are worth reading, download exactly
+those with `--citekey KEY` (repeatable) or `--from-file list.txt` — never `--limit N`,
+which takes the first N alphabetically and has nothing to do with what they picked. It will report some papers as having no open version — that is expected,
 not a failure, and you do not work around it: tell the user which ones and let them decide
 whether to get them through their library.
 
@@ -303,6 +313,8 @@ Re-run `discover` with the same query later and it skips everything already file
 | `no note has an openalex_id` | `cites` ran before `discover`. Order matters. |
 | Notes exist but have no citations | Normal: OpenAlex publishes reference lists for about half of all works. Not a bug, do not retry. |
 | Unicode errors on Windows | Set `PYTHONIOENCODING=utf-8` before the command. |
+| `error: externally-managed-environment` | The system Python refuses global installs. Create the venv from step 1b; never pass `--break-system-packages`. |
+| `discover` returns 0 with several `--query` | Fixed: they are unioned now. If an old clone, `git pull`. |
 
 ## What not to do
 

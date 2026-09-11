@@ -19,6 +19,7 @@ import collections
 import glob
 import json
 import os
+import re
 import sys
 
 from . import config, frontmatter, index, notes, openalex
@@ -94,6 +95,12 @@ def run(root=None, quiet=False):
         fm = frontmatter.split(text)
         if fm is None:
             continue
+        # Drop the fields a previous run wrote, or they accumulate: cites is meant
+        # to be safe to re-run after adding notes.
+        head, sep, rest = text.partition("\n---")
+        head = "\n".join(l for l in head.split("\n")
+                         if not re.match(r"^(cites_vault|cites_n):", l))
+        text = head + sep + rest
         fm_end = text.index("\n---", 3)
         line = ("cites_vault: [" + ", ".join('"[[' + k + ']]"' for k in inside) + "]\n"
                 f"cites_n: {len(inside) + len(outside)}\n")
