@@ -312,3 +312,58 @@ class TestEphemeralVaultWarning(unittest.TestCase):
                     "workspace/vault", "sandbox/vault"):
             self.assertIsNotNone(init.looks_ephemeral(os.path.join(home, *bad.split("/"))),
                                  f"{bad} should be flagged")
+
+
+class TestFetch(VaultCase):
+    """No network: the parts that decide what to download and what to keep."""
+
+    def test_pending_lists_notes_with_an_open_link(self):
+        from snowbib import fetch
+        self.write("open.md", note(title='"Open"', oa_pdf='"https://x/y.pdf"'))
+        self.write("closed.md", note(title='"Closed"', oa_pdf='""'))
+        items = {i["citekey"]: i for i in fetch.pending(self.vault)}
+        self.assertEqual(items["open"]["oa_pdf"], "https://x/y.pdf")
+        self.assertEqual(items["closed"]["oa_pdf"], "")
+        self.assertFalse(items["open"]["have"])
+
+    def test_unscreened_filter(self):
+        from snowbib import fetch
+        self.write("a.md", note(title='"A"', status="to_read"))
+        self.write("b.md", note(title='"B"', status="reference"))
+        keys = [i["citekey"] for i in fetch.pending(self.vault, only_unscreened=True)]
+        self.assertEqual(keys, ["a"])
+
+    def test_a_landing_page_is_not_saved_as_a_pdf(self):
+        """A publisher answering with HTML must not leave a corrupt .pdf behind."""
+        from snowbib import fetch
+        page = os.path.join(self.tmp, "landing.html")
+        with open(page, "w", encoding="utf-8") as fh:
+            fh.write("<html><body>Access denied</body></html>")
+        dest = os.path.join(self.tmp, "x.pdf")
+        with self.assertRaises(ValueError):
+            fetch.download("file:///" + page.replace("\\", "/").lstrip("/"), dest)
+        self.assertFalse(os.path.exists(dest))
+
+    def test_a_real_pdf_is_saved(self):
+        from snowbib import fetch
+        src = os.path.join(self.tmp, "real.pdf")
+        with open(src, "wb") as fh:
+            fh.write(b"%PDF-1.4\n...body...")
+        dest = os.path.join(self.tmp, "out.pdf")
+        size = fetch.download("file:///" + src.replace("\\", "/").lstrip("/"), dest)
+        self.assertTrue(os.path.exists(dest))
+        self.assertEqual(size, os.path.getsize(dest))
+
+
+class TestConvertWithoutDependency(unittest.TestCase):
+    def test_missing_pymupdf_exits_with_instructions(self):
+        import importlib
+        from snowbib import convert
+        try:
+            importlib.import_module("pymupdf4llm")
+            self.skipTest("pymupdf4llm is installed here")
+        except ImportError:
+            pass
+        with self.assertRaises(SystemExit) as cm:
+            convert._require_pymupdf()
+        self.assertIn("pip install pymupdf4llm", str(cm.exception))

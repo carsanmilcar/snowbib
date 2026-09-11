@@ -17,7 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Topic :: Text Processing :: Markup :: Markdown",
 ]
-dependencies = []
+dependencies = ["pymupdf4llm>=0.0.17"]
 
 [project.urls]
 Homepage = "https://github.com/carsanmilcar/snowbib"
@@ -26,6 +26,8 @@ Homepage = "https://github.com/carsanmilcar/snowbib"
 snowbib-init = "snowbib.init:main"
 snowbib-discover = "snowbib.discover:main"
 snowbib-cites = "snowbib.cites:main"
+snowbib-fetch = "snowbib.fetch:main"
+snowbib-convert = "snowbib.convert:main"
 snowbib-index = "snowbib.index:main"
 snowbib-check = "snowbib.check:main"
 snowbib-screen = "snowbib.screen:main"

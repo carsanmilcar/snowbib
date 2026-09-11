@@ -95,8 +95,15 @@ Needs 3.9 or newer. If it is missing:
 - **macOS** — `brew install python` if they have Homebrew; otherwise the python.org
   installer.
 
-No other dependencies exist. Do not create a virtualenv, do not run pip install for
-requirements: there are none.
+## Step 1b — Install the one dependency
+
+```bash
+cd snowbib-tool && pip install -e .
+```
+
+That pulls in `pymupdf4llm`, needed only to turn downloaded PDFs into text. Everything
+else — building the vault, the citation graph, the filter — works without it, so if the
+install fails, say so and carry on rather than stopping the setup.
 
 ## Step 2 — Clone the tool
 
@@ -242,6 +249,21 @@ Verdicts: `FILED` (has a note), `DROPPED` (buried in `.snowbib/excluded.json`),
 
 If everything comes back `NEW`, the index is empty or you are pointing at the wrong
 folder. Re-run `index` and read its warnings before believing the answer.
+
+### Getting the papers themselves
+
+```bash
+python -m snowbib.fetch   --vault <VAULT> --unscreened --limit 20
+python -m snowbib.convert --vault <VAULT>
+```
+
+`fetch` downloads only the open-access versions OpenAlex knows about, into
+`.snowbib/pdf/`. It will report some papers as having no open version — that is expected,
+not a failure, and you do not work around it: tell the user which ones and let them decide
+whether to get them through their library.
+
+`convert` turns the downloaded PDFs into `.snowbib/text/<citekey>.md`. Those text files
+are what you hand to screening agents, one file each.
 
 ### Screening
 

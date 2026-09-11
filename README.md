@@ -14,8 +14,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-0a2540" alt="MIT">
   <img src="https://img.shields.io/badge/python-3.9%2B-0a2540" alt="Python 3.9+">
-  <img src="https://img.shields.io/badge/dependencies-none-4a90d9" alt="No dependencies">
-  <img src="https://img.shields.io/badge/tests-23%20passing-4a90d9" alt="23 tests">
+  <img src="https://img.shields.io/badge/dependencies-1-4a90d9" alt="One dependency">
+  <img src="https://img.shields.io/badge/tests-32%20passing-4a90d9" alt="32 tests">
   <img src="https://img.shields.io/badge/status-alpha-8bb8e8" alt="Alpha">
 </p>
 
@@ -53,6 +53,7 @@ install and run all of this for you — see [Quick start](#quick-start-no-progra
 | 🔗 **The citation graph** | Who cites whom, as links you can click and see |
 | 🕳️ **Your blind spots** | Papers your collection cites constantly that you never filed |
 | 🚦 **A memory for your assistant** | Four answers to "do I already have this?" |
+| 📥 **The papers themselves** | Open-access PDFs downloaded and turned into text your assistant can read |
 | 📁 **Plain files** | Markdown on your disk. No account, no lock-in, no database |
 
 ### The four answers
