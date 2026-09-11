@@ -196,6 +196,9 @@ comments — not arbitrary YAML. Keep to the shape above.
   1,564,988 works in Mathematics from 2015 on (54%), 890,248 of 2,085,158 in Earth and
   Planetary Sciences (43%). A `NEW` verdict does not prove nothing cites it.
 - Text search is blunt: add `--min-citations` or a profile `field` to cut noise.
+- **Queries must be in English.** OpenAlex indexes titles and abstracts almost entirely in
+  English; the same field searched in another language returns a few stray works rather
+  than thousands. `discover` warns when a query returns fewer than 50 matches.
 - OpenAlex has no MSC codes, so mathematical subfields are delimited more coarsely than
   in zbMATH or MathSciNet.
 - snowbib downloads no papers.

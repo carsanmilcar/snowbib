@@ -47,6 +47,17 @@ def run(root=None, queries=None, prof=None, limit=None, min_year=None,
     print(f"filter  : {filters}")
     print(f"matches : {total:,}" + (f"  (fetching the first {limit:,})" if limit and limit < total else ""))
 
+    if total < 50:
+        print(f"\nsnowbib: only {total} match(es). Before narrowing anything else, check the "
+              f"language of the query:\n"
+              f"  OpenAlex indexes titles and abstracts overwhelmingly in ENGLISH, so a "
+              f"phrase in\n  another language finds almost nothing even when the field is "
+              f"enormous.\n"
+              f"  Example: 'mecanica cuantica supersimetrica' returns 3 works; "
+              f"'supersymmetric\n  quantum mechanics' returns 3,046.\n"
+              f"  Also try the terms a paper would use in its title rather than the ones you "
+              f"would\n  use to describe your field to a colleague.", file=sys.stderr)
+
     if dry_run:
         print("\nDry run: nothing written. Drop --dry-run to fetch, or narrow the "
               "query first — a vault of tens of thousands of notes is hard to read.")

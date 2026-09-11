@@ -117,11 +117,19 @@ Please set up a snowbib vault in this folder by following the instructions at
 https://github.com/carsanmilcar/snowbib/blob/master/AGENT-INSTALL.md
 
 I don't program, so do everything yourself and explain each step in plain
-language. Stop and ask me before anything slow or irreversible.
+language. Stop and ask me before downloading any papers.
 
-MY FIELD IS: persistent homology and topological data analysis
+MY FIELD IS: supersymmetric quantum mechanics
 MY EMAIL IS: me@university.edu
 ```
+
+> [!IMPORTANT]
+> **Write your field in English, using the words a paper would put in its title.**
+> OpenAlex indexes titles and abstracts almost entirely in English, so a phrase in
+> any other language finds nearly nothing even when the field is huge:
+> *mecánica cuántica supersimétrica* returns 3 papers, *supersymmetric quantum
+> mechanics* returns 3,046. This is the single most common reason a search comes
+> back empty.
 
 That address is not a sign-up. OpenAlex asks who is calling so it can give you the fast
 lane instead of the throttled one. It stays on your computer.
@@ -133,6 +141,9 @@ Claude will tell you how many papers matched **before downloading anything**:
 - **Under ~2,000** — comfortable, go ahead.
 - **More than that** — your topic is too wide. Narrow it, or ask for only well-cited
   papers. Notes are easy to add later and tedious to delete.
+- **Almost none** — nine times out of ten the phrase is not in English, or it is how you
+  describe your field rather than how a paper titles itself. Try again before concluding
+  the field is small.
 
 ### 6. Open it in Obsidian
 

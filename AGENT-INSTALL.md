@@ -6,7 +6,8 @@ plain language, and stop where this document tells you to stop.
 
 Two things you need from them. Ask now if you do not have both:
 
-- **Their field**, as they would describe it to a colleague.
+- **Their field.** Whatever language they answer in, you will search OpenAlex **in
+  English**, using the words a paper would put in its title. See step 5.
 - **An email address**, for OpenAlex's polite pool. It is not a sign-up and it never
   leaves their machine. Tell them that when you ask.
 
@@ -91,10 +92,23 @@ python -m snowbib.discover --vault <VAULT> --query "<their topic>" --min-citatio
 | Under 2,000 | Comfortable. Ask if you should go ahead. |
 | 2,000 – 10,000 | Large but workable. Suggest narrowing the phrase or raising `--min-citations`. |
 | Over 10,000 | Too wide to be readable. Propose a narrower phrase and re-run the dry run. |
-| Under 50 | Probably too narrow or a typo. Offer a broader phrase. |
+| Under 50 | **Check the language first.** See below. |
 
 Pass `--query` several times to widen with alternative phrasings; they are OR-ed.
 `--min-year` cuts off old work. **Do not proceed until they answer.**
+
+**If the count is near zero, the query language is almost always the cause.** OpenAlex
+indexes titles and abstracts overwhelmingly in English. A user describing their field in
+Spanish, French, German or Portuguese will get nothing:
+
+```
+"mecanica cuantica supersimetrica"   ->     3 works
+"supersymmetric quantum mechanics"   -> 3,046 works
+```
+
+Translate their field into the terms a paper would use **in its title**, show them the
+translation you used, and re-run the dry run. Do not report "your field has no papers"
+until you have tried it in English.
 
 ## Step 6 — Fetch
 
@@ -182,6 +196,7 @@ Re-run `discover` with the same query later and it skips everything already file
 | `no papers directory at ...` | Wrong `--vault`, or `init` never ran. Step 4. |
 | `WARNING the index has no notes` | Pointing at the wrong folder, or the vault is genuinely empty. Never report verdicts from an empty index. |
 | Everything comes back `NEW` | Same cause as above, nine times out of ten. |
+| `matches : 0` or a handful | The query is probably not in English. Translate it and re-run. Never conclude the field is empty from a non-English phrase. |
 | `refuses: N matches is too broad` | Working as intended. Narrow the query; do not reach for `--limit` to force it. |
 | `no note has an openalex_id` | `cites` ran before `discover`. Order matters. |
 | Notes exist but have no citations | Normal: OpenAlex publishes reference lists for about half of all works. Not a bug, do not retry. |

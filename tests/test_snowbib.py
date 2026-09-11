@@ -264,3 +264,25 @@ class TestInit(unittest.TestCase):
             init.create(root)  # idempotent
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TestLowMatchWarning(unittest.TestCase):
+    """A near-zero count is almost always a non-English query; say so."""
+
+    def test_warns_and_names_the_language_trap(self):
+        import contextlib
+        from snowbib import discover, openalex
+        tmp = tempfile.mkdtemp(prefix="snowbib-test-")
+        try:
+            os.makedirs(os.path.join(tmp, "papers"))
+            original = openalex.count
+            openalex.count = lambda filters: 3
+            err = io.StringIO()
+            try:
+                with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
+                    discover.run(tmp, ["mecanica cuantica supersimetrica"], dry_run=True)
+            finally:
+                openalex.count = original
+            self.assertIn("ENGLISH", err.getvalue())
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
