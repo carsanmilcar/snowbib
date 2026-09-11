@@ -1,0 +1,23 @@
+# Profile: mathematics. What is worth extracting is a property of the field.
+name: mathematics
+
+# How the corpus is delimited in OpenAlex.
+openalex:
+  field: fields/26            # Mathematics
+  queries:
+    - "persistent homology"
+    - "topological data analysis"
+  min_year: 2000
+
+# Extra front matter fields on every note, on top of the common ones.
+fields:
+  setting: ""                 # the space or structure it works over
+  technique: []               # the central technique
+  results_used: []            # earlier results it leans on
+  msc: []                     # MSC codes, by hand: OpenAlex does not expose them
+
+# What screening should pull out of the body.
+screening_prompt: >
+  Extract the contribution (what is proved, not what it is about), the
+  hypotheses it needs, the central technique, and which earlier results it
+  depends on. Ignore the abstract where the body contradicts it.

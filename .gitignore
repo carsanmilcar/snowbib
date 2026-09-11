@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+
+# Secrets and local identity: never commit these.
+.env
+.env.*
+!.env.example
+
+# A user's vault is their data, not the tool's.
+vault/
+papers/
+.snowbib/
+
+# Environments and editors
+.venv/
+venv/
+.idea/
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db

@@ -1,0 +1,21 @@
+# Profile: statistical postprocessing of numerical weather prediction.
+name: nwp-postprocessing
+
+openalex:
+  field: fields/19            # Earth and Planetary Sciences
+  queries:
+    - "ensemble postprocessing"
+    - "ensemble model output statistics"
+    - "statistical postprocessing forecast"
+  min_year: 1990
+
+fields:
+  domain: ""
+  method_family: []
+  metrics: []                 # ALWAYS with context: baseline, variable, lead, % gain
+
+screening_prompt: >
+  Extract the reported metrics (CRPS, Brier, MAE, skill scores, coverage) from
+  the BODY, each with its context: against which baseline, which variable, which
+  lead time, what percentage improvement. A metric without context is not
+  comparable across papers.
