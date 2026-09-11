@@ -83,6 +83,26 @@ def pending(root=None, only_unscreened=False, keys=None):
     return out
 
 
+def alternate_pdf_urls(doi):
+    """Other open copies OpenAlex knows about, for when the main link fails.
+
+    `open_access.oa_url` is often a doi.org landing page, while `locations` holds
+    the direct file — an arXiv, PubMed Central or publisher copy. Asking for them
+    turns a fair number of failures into downloads.
+    """
+    from . import openalex
+    try:
+        data = openalex.get(f"works/doi:{doi}", {"select": "locations"})
+    except (RuntimeError, urllib.error.URLError, ValueError):
+        return []
+    urls = []
+    for loc in data.get("locations") or []:
+        url = loc.get("pdf_url")
+        if url and url not in urls:
+            urls.append(url)
+    return urls
+
+
 def run_resolver_cmd(template, doi, dest):
     """Hand a DOI to an external program and let it produce the PDF.
 
@@ -155,8 +175,24 @@ def run(root=None, limit=None, only_unscreened=False, resolver=None, pause=1.0,
                 size = scihub.fetch(item["doi"], item["dest"])
                 label = "ok(sh)"
             else:
-                size = download(url, item["dest"])
-                label = "ok"
+                try:
+                    size = download(url, item["dest"])
+                    label = "ok"
+                except (urllib.error.URLError, ValueError, OSError) as first:
+                    # The headline link is often a landing page; OpenAlex usually
+                    # knows a direct copy elsewhere.
+                    size, label = None, "ok"
+                    for alt in alternate_pdf_urls(item["doi"]) if item["doi"] else []:
+                        if alt == url:
+                            continue
+                        try:
+                            size = download(alt, item["dest"])
+                            label = "ok(alt)"
+                            break
+                        except (urllib.error.URLError, ValueError, OSError):
+                            continue
+                    if size is None:
+                        raise first
             ok += 1
             print(f"  {label:7} {item['citekey']}  ({size // 1024} KB)")
         except (urllib.error.URLError, TimeoutError, ValueError, OSError,

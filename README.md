@@ -15,7 +15,7 @@
   <img src="https://img.shields.io/badge/license-MIT-0a2540" alt="MIT">
   <img src="https://img.shields.io/badge/python-3.9%2B-0a2540" alt="Python 3.9+">
   <img src="https://img.shields.io/badge/dependencies-1-4a90d9" alt="One dependency">
-  <img src="https://img.shields.io/badge/tests-40%20passing-4a90d9" alt="40 tests">
+  <img src="https://img.shields.io/badge/tests-42%20passing-4a90d9" alt="42 tests">
   <img src="https://img.shields.io/badge/status-alpha-8bb8e8" alt="Alpha">
 </p>
 

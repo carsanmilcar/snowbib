@@ -134,6 +134,10 @@ Downloads the `oa_pdf` link OpenAlex publishes for each note into
 an HTML error is reported rather than saved. Handles gzip and sends browser-like headers,
 since several publishers answer a bare request with 403.
 
+When that link fails — it is often a doi.org landing page rather than a file — the other
+copies OpenAlex lists for the work are tried in turn: an arXiv, PubMed Central or
+publisher version. Those downloads are marked `ok(alt)`.
+
 Papers with no open version are counted and named, never guessed at.
 
 **snowbib ships no way of getting closed-access papers, and will not.** Which sources are
@@ -281,6 +285,6 @@ comments — not arbitrary YAML. Keep to the shape above.
 python -m unittest discover -s tests
 ```
 
-40 tests, no network. Every case is a bug that shipped once: front matter that is not
+42 tests, no network. Every case is a bug that shipped once: front matter that is not
 double quoted, CRLF line endings, counting link occurrences instead of citing notes, a
 vault path with brackets.

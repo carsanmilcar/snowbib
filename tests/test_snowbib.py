@@ -485,5 +485,38 @@ class TestCuratedSelection(VaultCase):
         self.write("b.md", note(title='"B"'))
         self.assertEqual(len(fetch.pending(self.vault)), 2)
 
+
+class TestAlternateLocations(unittest.TestCase):
+    """When the headline link is a landing page, try the copies OpenAlex knows."""
+
+    def test_pdf_urls_are_collected_from_locations(self):
+        from snowbib import fetch, openalex
+        real = openalex.get
+        openalex.get = lambda path, params=None, **kw: {"locations": [
+            {"pdf_url": None},
+            {"pdf_url": "https://ojs.example/download/1"},
+            {"pdf_url": "https://arxiv.example/abs.pdf"},
+            {"pdf_url": "https://ojs.example/download/1"},   # duplicate
+        ]}
+        try:
+            self.assertEqual(fetch.alternate_pdf_urls("10.1000/x"),
+                             ["https://ojs.example/download/1",
+                              "https://arxiv.example/abs.pdf"])
+        finally:
+            openalex.get = real
+
+    def test_a_failing_lookup_is_not_fatal(self):
+        from snowbib import fetch, openalex
+        real = openalex.get
+
+        def boom(*a, **kw):
+            raise RuntimeError("OpenAlex unreachable")
+
+        openalex.get = boom
+        try:
+            self.assertEqual(fetch.alternate_pdf_urls("10.1000/x"), [])
+        finally:
+            openalex.get = real
+
 if __name__ == "__main__":
     unittest.main()

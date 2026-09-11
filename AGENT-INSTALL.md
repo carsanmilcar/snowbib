@@ -116,6 +116,10 @@ python -m venv .venv
 .venv/bin/python -m pip install -e .        # Windows: .venv\Scripts\python -m pip install -e .
 ```
 
+From here on, **`PY` means `.venv/bin/python`** (`.venv\Scripts\python` on Windows).
+Writing a bare `python` runs the system one, where snowbib is not installed and `convert`
+cannot find its dependency.
+
 **Use the venv, do not skip it.** On macOS with Homebrew and on most Linux distributions a
 plain `pip install` fails with `externally-managed-environment` (PEP 668), because the
 system Python refuses to be written to. Do not reach for `--break-system-packages`: create
@@ -129,9 +133,10 @@ fails, say so and carry on rather than stopping the setup.
 ## Step 3 — Configure the email
 
 ```bash
-cd snowbib-tool
 cp .env.example .env      # Windows PowerShell: copy .env.example .env
 ```
+
+(You are already inside `snowbib-tool` from the previous step.)
 
 Edit `.env` so it reads `SNOWBIB_MAILTO=their@address`. Explain why: OpenAlex gives
 identified callers a faster, more reliable service, the file stays on their machine, and
@@ -140,7 +145,7 @@ it is git-ignored so it can never be committed.
 ## Step 4 — Create the vault
 
 ```bash
-python -m snowbib.init --vault <THE FOLDER FROM STEP 0>
+PY -m snowbib.init --vault <THE FOLDER FROM STEP 0>
 ```
 
 Add `--profile math` if their field is mathematical, or `--profile nwp` for weather and
@@ -152,7 +157,7 @@ Check the output names the right folder. The vault must **not** be inside `snowb
 ## Step 5 — Count before you fetch. STOP HERE.
 
 ```bash
-python -m snowbib.discover --vault <VAULT> --query "<their topic>" --min-citations 20 --dry-run
+PY -m snowbib.discover --vault <VAULT> --query "<their topic>" --min-citations 20 --dry-run
 ```
 
 `--dry-run` writes nothing. Report the number to them in their own terms and wait:
@@ -183,9 +188,9 @@ until you have tried it in English.
 ## Step 6 — Fetch
 
 ```bash
-python -m snowbib.discover --vault <VAULT> --query "<their topic>" --min-citations 20
-python -m snowbib.cites    --vault <VAULT>
-python -m snowbib.index    --vault <VAULT>
+PY -m snowbib.discover --vault <VAULT> --query "<their topic>" --min-citations 20
+PY -m snowbib.cites    --vault <VAULT>
+PY -m snowbib.index    --vault <VAULT>
 ```
 
 The middle command is the slow one — it asks OpenAlex for every paper's reference list
@@ -205,9 +210,9 @@ cites constantly and that are not in it**. Not a recommendation — a count. Off
 notes for the top ones:
 
 ```bash
-python -m snowbib.check --vault <VAULT> "<title or DOI>"     # confirm it is CITED, not FILED
-python -m snowbib.discover --vault <VAULT> --query "<exact title>" --limit 1
-python -m snowbib.cites --vault <VAULT> && python -m snowbib.index --vault <VAULT>
+PY -m snowbib.check --vault <VAULT> "<title or DOI>"     # confirm it is CITED, not FILED
+PY -m snowbib.discover --vault <VAULT> --query "<exact title>" --limit 1
+PY -m snowbib.cites --vault <VAULT> && PY -m snowbib.index --vault <VAULT>
 ```
 
 ## Step 8 — Walk them through Obsidian. You cannot do this part for them.
@@ -245,7 +250,7 @@ already in their vault, what the most co-cited unfiled papers are, and to screen
 ### Checking a candidate
 
 ```bash
-python -m snowbib.check --vault <VAULT> "10.1090/S0273-0979-09-01249-X" "Computing Persistent Homology"
+PY -m snowbib.check --vault <VAULT> "10.1090/S0273-0979-09-01249-X" "Computing Persistent Homology"
 ```
 
 Accepts DOIs, doi.org URLs, OpenAlex ids, citekeys and bare titles — as arguments or on
@@ -261,8 +266,8 @@ folder. Re-run `index` and read its warnings before believing the answer.
 ### Getting the papers themselves
 
 ```bash
-python -m snowbib.fetch   --vault <VAULT> --unscreened --limit 20
-python -m snowbib.convert --vault <VAULT>
+PY -m snowbib.fetch   --vault <VAULT> --citekey KEY1 --citekey KEY2   # what they chose
+PY -m snowbib.convert --vault <VAULT>
 ```
 
 `fetch` downloads only the open-access versions OpenAlex knows about, into
@@ -278,7 +283,7 @@ are what you hand to screening agents, one file each.
 ### Screening
 
 ```bash
-python -m snowbib.screen --vault <VAULT> --limit 20
+PY -m snowbib.screen --vault <VAULT> --limit 20
 ```
 
 This prints a work order; snowbib never calls a model itself. Follow it exactly, and in
