@@ -127,9 +127,24 @@ Downloads the `oa_pdf` link OpenAlex publishes for each note into
 an HTML error is reported rather than saved. Handles gzip and sends browser-like headers,
 since several publishers answer a bare request with 403.
 
-Papers with no open version are counted and named, never guessed at. `--resolver` takes a
-URL template containing `{doi}` — a library proxy, for instance — and you are responsible
-for what you point it at.
+Papers with no open version are counted and named, never guessed at.
+
+**snowbib ships no way of getting closed-access papers, and will not.** Which sources are
+acceptable depends on your institution and your jurisdiction, not on this tool. Two hooks
+let you plug in whatever you already use:
+
+- `--resolver URL` — a URL template containing `{doi}`, such as a library proxy.
+- `--resolver-cmd CMD` — any external program, with `{doi}` and `{out}` substituted:
+
+  ```bash
+  python -m snowbib.fetch --vault ~/tda       --resolver-cmd "my-fetcher --doi {doi} --output {out}"
+  ```
+
+  It must leave a PDF at `{out}`; anything else is deleted and reported. The DOI is
+  checked against the DOI grammar before it is passed to a process, and the command runs
+  without a shell.
+
+You are responsible for what you point either of them at.
 
 ### `convert` — PDF to markdown
 
@@ -237,6 +252,6 @@ comments — not arbitrary YAML. Keep to the shape above.
 python -m unittest discover -s tests
 ```
 
-32 tests, no network. Every case is a bug that shipped once: front matter that is not
+35 tests, no network. Every case is a bug that shipped once: front matter that is not
 double quoted, CRLF line endings, counting link occurrences instead of citing notes, a
 vault path with brackets.

@@ -1,8 +1,10 @@
 """Tests for snowbib. Run: python -m unittest discover -s tests
 
-Every case here is a bug that shipped once: front matter that is not double
-quoted, counting link occurrences instead of citing notes, a vault path with
-brackets, notes without front matter.
+Most cases here are a bug that shipped once: front matter that is not double
+quoted, CRLF line endings, counting link occurrences instead of citing notes, a
+vault path with brackets, a non-PDF saved as one, a DOI reaching a subprocess.
+
+No network: anything that would call OpenAlex is either stubbed or not exercised.
 """
 import io
 import json
@@ -163,9 +165,6 @@ class TestFrontMatterUnit(unittest.TestCase):
         self.assertEqual(frontmatter.get(fm, "a"), "bare")
         self.assertEqual(frontmatter.get(fm, "b"), "quoted # kept")
 
-
-if __name__ == "__main__":
-    unittest.main()
 
 
 class TestLineEndings(VaultCase):
@@ -367,3 +366,50 @@ class TestConvertWithoutDependency(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             convert._require_pymupdf()
         self.assertIn("pip install pymupdf4llm", str(cm.exception))
+
+
+class TestResolverHook(unittest.TestCase):
+    """The external-fetcher hook: snowbib ships none, so this is the seam."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="snowbib-test-")
+        self.script = os.path.join(self.tmp, "resolver.py")
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _write_resolver(self, payload):
+        with open(self.script, "w", encoding="utf-8") as fh:
+            fh.write("import sys\n"
+                     "out = sys.argv[sys.argv.index('--output') + 1]\n"
+                     f"open(out, 'wb').write({payload!r})\n")
+
+    def _cmd(self):
+        return f'"{sys.executable}" "{self.script}" --doi {{doi}} --output {{out}}'
+
+    def test_a_pdf_from_the_hook_is_kept(self):
+        from snowbib import fetch
+        self._write_resolver(b"%PDF-1.4\nbody")
+        dest = os.path.join(self.tmp, "out.pdf")
+        size = fetch.run_resolver_cmd(self._cmd(), "10.1000/ok", dest)
+        self.assertTrue(os.path.exists(dest))
+        self.assertGreater(size, 0)
+
+    def test_html_from_the_hook_is_deleted_not_kept(self):
+        from snowbib import fetch
+        self._write_resolver(b"<html>denied</html>")
+        dest = os.path.join(self.tmp, "out.pdf")
+        with self.assertRaises(ValueError):
+            fetch.run_resolver_cmd(self._cmd(), "10.1000/ok", dest)
+        self.assertFalse(os.path.exists(dest), "a non-PDF must not be left behind")
+
+    def test_a_doi_that_is_not_one_never_reaches_the_process(self):
+        from snowbib import fetch
+        self._write_resolver(b"%PDF-1.4\n")
+        for bad in ("10.1000/x & whoami", "not-a-doi", "10.1000/x; rm -rf /"):
+            with self.assertRaises(ValueError) as cm:
+                fetch.run_resolver_cmd(self._cmd(), bad, os.path.join(self.tmp, "o.pdf"))
+            self.assertIn("unexpected shape", str(cm.exception))
+
+if __name__ == "__main__":
+    unittest.main()
