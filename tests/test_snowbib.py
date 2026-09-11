@@ -411,5 +411,57 @@ class TestResolverHook(unittest.TestCase):
                 fetch.run_resolver_cmd(self._cmd(), bad, os.path.join(self.tmp, "o.pdf"))
             self.assertIn("unexpected shape", str(cm.exception))
 
+
+class TestScihubAdapter(unittest.TestCase):
+    """The submodule seam. No network: the client is stubbed."""
+
+    def test_absent_submodule_explains_how_to_get_it(self):
+        from snowbib import scihub
+        real = scihub.VENDOR
+        scihub.VENDOR = os.path.join(real, "definitely-not-here")
+        try:
+            self.assertFalse(scihub.available())
+            with self.assertRaises(RuntimeError) as cm:
+                scihub.fetch("10.1000/x", os.path.join(tempfile.gettempdir(), "x.pdf"))
+            self.assertIn("git submodule update --init", str(cm.exception))
+        finally:
+            scihub.VENDOR = real
+
+    def test_a_non_pdf_is_deleted_not_kept(self):
+        from snowbib import scihub
+        tmp = tempfile.mkdtemp(prefix="snowbib-test-")
+        dest = os.path.join(tmp, "out.pdf")
+
+        class FakeClient:
+            @staticmethod
+            def search_paper_by_doi(doi):
+                return {"pdf_url": "https://example.invalid/x.pdf"}
+
+            @staticmethod
+            def download_paper(url, out):
+                with open(out, "wb") as fh:
+                    fh.write(b"<html>not a pdf</html>")
+                return True
+
+        real = scihub._load
+        scihub._load = lambda: FakeClient
+        try:
+            with self.assertRaises(ValueError):
+                scihub.fetch("10.1000/x", dest)
+            self.assertFalse(os.path.exists(dest))
+        finally:
+            scihub._load = real
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_no_pdf_url_is_an_error_not_an_empty_file(self):
+        from snowbib import scihub
+        real = scihub._load
+        scihub._load = lambda: type("C", (), {"search_paper_by_doi": staticmethod(lambda d: {})})
+        try:
+            with self.assertRaises(ValueError):
+                scihub.fetch("10.1000/x", os.path.join(tempfile.gettempdir(), "y.pdf"))
+        finally:
+            scihub._load = real
+
 if __name__ == "__main__":
     unittest.main()

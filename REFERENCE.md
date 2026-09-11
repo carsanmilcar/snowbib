@@ -146,6 +146,28 @@ let you plug in whatever you already use:
 
 You are responsible for what you point either of them at.
 
+#### Closed access: the Sci-Hub submodule
+
+`vendor/scihub-mcp` is a git submodule pointing at
+[carsanmilcar/Sci-Hub-MCP-Server](https://github.com/carsanmilcar/Sci-Hub-MCP-Server),
+a fork of [JackKuo666/Sci-Hub-MCP-Server](https://github.com/JackKuo666/Sci-Hub-MCP-Server)
+with a patch for Sci-Hub's current ALTCHA proof-of-work challenge.
+
+**None of that code is in this repository.** A submodule records a URL and a commit, so
+cloning snowbib does not bring it down and `pip install snowbib` never sees it. The
+upstream publishes no licence, which is exactly why it is referenced rather than copied.
+You opt in:
+
+```bash
+git submodule update --init vendor/scihub-mcp
+pip install -r vendor/scihub-mcp/requirements.txt   # requests, bs4
+python -m snowbib.fetch --vault ~/tda --scihub
+```
+
+Without those two commands, `--scihub` fails with instructions rather than doing anything.
+Whether using it is lawful where you are is your call; snowbib takes no position and wires
+it into no default.
+
 ### `convert` — PDF to markdown
 
 ```bash
@@ -252,6 +274,6 @@ comments — not arbitrary YAML. Keep to the shape above.
 python -m unittest discover -s tests
 ```
 
-35 tests, no network. Every case is a bug that shipped once: front matter that is not
+38 tests, no network. Every case is a bug that shipped once: front matter that is not
 double quoted, CRLF line endings, counting link occurrences instead of citing notes, a
 vault path with brackets.

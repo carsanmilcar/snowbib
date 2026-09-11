@@ -20,7 +20,7 @@ import urllib.error
 import urllib.request
 import zlib
 
-from . import config, frontmatter, index
+from . import config, frontmatter, index, scihub
 
 UA = ("Mozilla/5.0 (compatible; snowbib/0.1; "
       "+https://github.com/carsanmilcar/snowbib)")
@@ -111,7 +111,7 @@ def run_resolver_cmd(template, doi, dest):
 
 
 def run(root=None, limit=None, only_unscreened=False, resolver=None, pause=1.0,
-        resolver_cmd=None):
+        resolver_cmd=None, use_scihub=False):
     root = config.vault_root(root)
     if not os.path.isdir(config.papers_dir(root)):
         sys.exit(f"snowbib: no vault at {root}")
@@ -129,20 +129,24 @@ def run(root=None, limit=None, only_unscreened=False, resolver=None, pause=1.0,
         if not url and resolver and item["doi"]:
             url = resolver.replace("{doi}", item["doi"])
         use_cmd = not url and resolver_cmd and item["doi"]
-        if not url and not use_cmd:
+        use_sh = not url and not use_cmd and use_scihub and item["doi"]
+        if not url and not use_cmd and not use_sh:
             closed += 1
             continue
         try:
             if use_cmd:
                 size = run_resolver_cmd(resolver_cmd, item["doi"], item["dest"])
                 label = "ok(cmd)"
+            elif use_sh:
+                size = scihub.fetch(item["doi"], item["dest"])
+                label = "ok(sh)"
             else:
                 size = download(url, item["dest"])
                 label = "ok"
             ok += 1
             print(f"  {label:7} {item['citekey']}  ({size // 1024} KB)")
         except (urllib.error.URLError, TimeoutError, ValueError, OSError,
-                subprocess.SubprocessError) as exc:
+                RuntimeError, subprocess.SubprocessError) as exc:
             failed += 1
             print(f"  failed  {item['citekey']}: {exc}", file=sys.stderr)
         time.sleep(pause)
@@ -176,10 +180,16 @@ def main(argv=None):
                         "\"my-fetcher --doi {doi} --output {out}\". snowbib ships no "
                         "such tool and takes no position on which you use; what is "
                         "acceptable depends on your institution and jurisdiction.")
+    p.add_argument("--scihub", action="store_true",
+                   help="for papers with no open version, try the Sci-Hub client in the "
+                        "vendor/scihub-mcp submodule. Not bundled and not installed by "
+                        "default; see REFERENCE.md. Whether this is lawful where you are "
+                        "is your call.")
     p.add_argument("--pause", type=float, default=1.0,
                    help="seconds between downloads (default 1.0; be kind to servers)")
     a = p.parse_args(argv)
-    run(a.vault, a.limit, a.unscreened, a.resolver, a.pause, a.resolver_cmd)
+    run(a.vault, a.limit, a.unscreened, a.resolver, a.pause, a.resolver_cmd,
+        a.scihub)
 
 
 if __name__ == "__main__":

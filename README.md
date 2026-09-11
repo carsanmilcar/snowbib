@@ -15,7 +15,7 @@
   <img src="https://img.shields.io/badge/license-MIT-0a2540" alt="MIT">
   <img src="https://img.shields.io/badge/python-3.9%2B-0a2540" alt="Python 3.9+">
   <img src="https://img.shields.io/badge/dependencies-1-4a90d9" alt="One dependency">
-  <img src="https://img.shields.io/badge/tests-35%20passing-4a90d9" alt="35 tests">
+  <img src="https://img.shields.io/badge/tests-38%20passing-4a90d9" alt="38 tests">
   <img src="https://img.shields.io/badge/status-alpha-8bb8e8" alt="Alpha">
 </p>
 
@@ -226,9 +226,10 @@ Read these before you trust it with something important.
   word can slip through as `NEW`.
 - **Mathematicians:** OpenAlex has no MSC codes, so its idea of your subfield is coarser
   than zbMATH's. The `math` profile leaves an `msc` field for you to fill.
-- **snowbib downloads open-access papers only.** Where a paper has no open version, it
-  says so and stops there. Getting it is your business, through your library or a tool of
-  your own plugged in with `--resolver-cmd`.
+- **snowbib downloads open-access papers by default.** Where a paper has no open version
+  it says so and stops there; getting it is your business, through your library, a tool of
+  your own plugged in with `--resolver-cmd`, or the optional submodule described in
+  [REFERENCE.md](REFERENCE.md#closed-access-the-sci-hub-submodule).
 
 ---
 

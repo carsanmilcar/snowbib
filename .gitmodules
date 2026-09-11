@@ -1,0 +1,3 @@
+[submodule "vendor/scihub-mcp"]
+	path = vendor/scihub-mcp
+	url = https://github.com/carsanmilcar/Sci-Hub-MCP-Server
